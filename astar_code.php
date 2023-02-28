@@ -19,16 +19,16 @@ $current_y = 0;
 $answer_x = 0;
 $answer_y = 0;
 
-function conv($x, $y) {
-	return $y * $GLOBALS["height"] + $x;
+function conv($x, $y, $height) {
+	return $y * $height + $x;
 }
 
-function break_x($id) {
-	return $id % $GLOBALS["height"];
+function break_x($id, $height) {
+	return $id % $height;
 }
 
-function break_y($id) {
-	return intdiv($id, $GLOBALS["height"]);
+function break_y($id, $height) {
+	return intdiv($id, $height);
 }
 
 function straight_line($x1,$y1,$x2,$y2) {
@@ -39,15 +39,15 @@ function straight_line($x1,$y1,$x2,$y2) {
 	return sqrt($deltax ** 2 + $deltay ** 2);
 }
 
-function display($cell, $maze) {
+function display($cell, $maze, $height, $width) {
     echo "<table>"."\n";
-	for($i = 0; $i < $GLOBALS["height"]; $i++) {
+	for($i = 0; $i < $height; $i++) {
         echo "<tr>"."\n";
-		for($j = 0; $j < $GLOBALS["width"]; $j++) {
+		for($j = 0; $j < $width; $j++) {
             echo "<td>"."\n";
 			echo($maze[$i][$j])." [";
-			echo($cell[conv($i, $j)]['from_start'])." ";
-			echo($cell[conv($i, $j)]['to_end'])."] ";
+			echo($cell[conv($i, $j, $height)]['from_start'])." ";
+			echo($cell[conv($i, $j, $height)]['to_end'])."] ";
             echo "</td>"."\n";
 		}
         echo "</tr>"."\n";
@@ -55,7 +55,7 @@ function display($cell, $maze) {
     echo "</table>"."\n"."<br>"."<br>";
 }
 
-function pathfinding($cell, $initial) {
+function pathfinding($cell, $initial, $height) {
     $current_cell = $initial;
     $path = array();
     array_push($path, $current_cell);
@@ -65,8 +65,22 @@ function pathfinding($cell, $initial) {
     }
     array_flip($path);
     foreach($path as &$item) {
-        echo break_x($item)." ".break_y($item)."<br>";
+        echo break_x($item, $height)." ".break_y($item, $height)."<br>";
     }
+}
+
+function cell_process($cell, $conv_id, $neighbor_x, $neighbor_y, $neighbor_path, $answer_x, $answer_y, $height) {
+	$id = conv($neighbor_x, $neighbor_y, $height);
+	if ($cell[$id]['state'] == NOT_VISITED) {
+		$cell[$id]['from_start'] = $cell[$conv_id]['from_start'] + $neighbor_path;
+		$cell[$id]['to_end'] = straight_line($answer_x, $answer_y, $neighbor_x, $neighbor_y);
+		$cell[$id]['previous'] = $conv_id;
+		$cell[$id]['state'] = SEEN;
+	} else if (($cell[$id]['state'] == SEEN)&&($cell[$id]['from_start'] > $cell[$conv_id]['from_start'] + $neighbor_path)) {
+		$cell[$id]['from_start'] = $cell[$conv_id]['from_start'] + $neighbor_path;
+		$cell[$id]['previous'] = $conv_id;
+	}
+	return $cell;
 }
 
 $cell = array();
@@ -76,60 +90,22 @@ for($i = 0; $i < $height * $width; $i++) {
 }
 
 $cycle = 1;
-$counter = 0;
-
 while($cycle) {
 	if (($current_x > 0)&&($maze[$current_x - 1][$current_y] != 0)) {
-		$id = conv($current_x - 1, $current_y);
-		if ($cell[$id]['state'] == NOT_VISITED) {
-			$cell[$id]['from_start'] = $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x - 1][$current_y];
-			$cell[$id]['to_end'] = straight_line($answer_x, $answer_y, $current_x - 1, $current_y);
-			$cell[$id]['previous'] = conv($current_x, $current_y);
-			$cell[$id]['state'] = SEEN;
-			array_push($seen_cells, $id);
-		} else if (($cell[$id]['state'] == SEEN)&&($cell[$id]['from_start'] > $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x - 1][$current_y])) {
-			$cell[$id]['from_start'] = $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x - 1][$current_y];
-			$cell[$id]['previous'] = conv($current_x, $current_y);
-		}
+		if ($cell[conv($current_x - 1, $current_y, $height)]['state'] == NOT_VISITED) array_push($seen_cells, conv($current_x - 1, $current_y, $height));
+		$cell = cell_process($cell, conv($current_x, $current_y, $height), $current_x - 1, $current_y, $maze[$current_x - 1][$current_y], $answer_x, $answer_y, $height);
 	} 
 	if (($current_x < $height - 1)&&($maze[$current_x + 1][$current_y] != 0)) {
-		$id = conv($current_x + 1, $current_y);
-		if ($cell[$id]['state'] == NOT_VISITED) {
-			$cell[$id]['from_start'] = $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x][$current_y];
-			$cell[$id]['to_end'] = straight_line($answer_x, $answer_y, $current_x + 1, $current_y);
-			$cell[$id]['previous'] = conv($current_x, $current_y);
-			$cell[$id]['state'] = SEEN;
-			array_push($seen_cells, $id);
-		} else if (($cell[$id]['state'] == SEEN)&&($cell[$id]['from_start'] > $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x + 1][$current_y])) {
-			$cell[$id]['from_start'] = $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x + 1][$current_y];
-			$cell[$id]['previous'] = conv($current_x, $current_y);
-		}
+		if ($cell[conv($current_x + 1, $current_y, $height)]['state'] == NOT_VISITED) array_push($seen_cells, conv($current_x + 1, $current_y, $height));
+		$cell = cell_process($cell, conv($current_x, $current_y, $height), $current_x + 1, $current_y, $maze[$current_x + 1][$current_y], $answer_x, $answer_y, $height);
 	} 
 	if (($current_y > 0)&&($maze[$current_x][$current_y - 1] != 0)) {
-		$id = conv($current_x, $current_y - 1);
-		if ($cell[$id]['state'] == NOT_VISITED) {
-			$cell[$id]['from_start'] = $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x][$current_y - 1];
-			$cell[$id]['to_end'] = straight_line($answer_x, $answer_y, $current_x, $current_y - 1);
-			$cell[$id]['previous'] = conv($current_x, $current_y);
-			$cell[$id]['state'] = SEEN;
-			array_push($seen_cells, $id);
-		} else if (($cell[$id]['state'] == SEEN)&&($cell[$id]['from_start'] > $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x][$current_y - 1])) {
-			$cell[$id]['from_start'] = $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x][$current_y - 1];
-			$cell[$id]['previous'] = conv($current_x, $current_y);
-		}
+		if ($cell[conv($current_x, $current_y - 1, $height)]['state'] == NOT_VISITED) array_push($seen_cells, conv($current_x, $current_y - 1, $height));
+		$cell = cell_process($cell, conv($current_x, $current_y, $height), $current_x, $current_y - 1, $maze[$current_x][$current_y - 1], $answer_x, $answer_y, $height);
 	} 
 	if (($current_y < $width - 1)&&($maze[$current_x][$current_y + 1] != 0)) {
-		$id = conv($current_x, $current_y + 1);
-		if ($cell[$id]['state'] == NOT_VISITED) {
-			$cell[$id]['from_start'] = $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x][$current_y + 1];
-			$cell[$id]['to_end'] = straight_line($answer_x, $answer_y, $current_x, $current_y + 1);
-			$cell[$id]['previous'] = conv($current_x, $current_y);
-			$cell[$id]['state'] = SEEN;
-			array_push($seen_cells, $id);
-		} else if (($cell[$id]['state'] == SEEN)&&($cell[$id]['from_start'] > $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x][$current_y + 1])) {
-			$cell[$id]['from_start'] = $cell[conv($current_x, $current_y)]['from_start'] + $maze[$current_x][$current_y + 1];
-			$cell[$id]['previous'] = conv($current_x, $current_y);
-		}
+		if ($cell[conv($current_x, $current_y + 1, $height)]['state'] == NOT_VISITED) array_push($seen_cells, conv($current_x, $current_y + 1, $height));
+		$cell = cell_process($cell, conv($current_x, $current_y, $height), $current_x, $current_y + 1, $maze[$current_x][$current_y + 1], $answer_x, $answer_y, $height);
 	} 
 	$new_best = $seen_cells[0];
 	foreach($seen_cells as &$value) {
@@ -141,19 +117,15 @@ while($cycle) {
 	}
 	$best_id = array_search($new_best, $seen_cells);
 	array_splice($seen_cells, $best_id, 1);
-    $cell[conv($current_x,$current_y)]['state'] = VISITED;
-	$current_x = break_x($new_best);
-	$current_y = break_y($new_best);
+    $cell[conv($current_x,$current_y, $height)]['state'] = VISITED;
+	$current_x = break_x($new_best, $height);
+	$current_y = break_y($new_best, $height);
 	echo($current_x)." ";
 	echo($current_y)."<br>";
-	display($cell, $maze);
+	display($cell, $maze, $height, $width);
 	if (($current_x == $answer_x) && ($current_y == $answer_y)) {
 		$cycle = 0;
-        pathfinding($cell, $new_best);
-	}
-	$counter++;
-	if ($counter > 200) {
-		$cycle = 0;
+        pathfinding($cell, $new_best, $height);
 	}
 }
     
