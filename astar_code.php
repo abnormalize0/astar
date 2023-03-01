@@ -1,5 +1,5 @@
 <?php
-
+setcookie("allow", "0", time() + 3600);
 if (isset($_COOKIE["file"])) {
     // print "lang cookie value: " . $_COOKIE["file"];
     $analyze = $_COOKIE["file"];
@@ -22,20 +22,37 @@ define ("VISITED", 2);
 $height = count($maze);
 $width = count($maze[0]);
 
-echo ">".$height."\n>".$width."\n";
-// $maze = [
-//     [1,1,1,1,1],
-//     [9,1,1,1,1],
-//     [9,0,0,0,1],
-//     [9,1,1,1,1],
-//     [1,1,2,1,1]
-// ];
-
 $current_x = 4;
 $current_y = 0;
 
 $answer_x = 0;
 $answer_y = 0;
+
+function main_table($maze, $height, $width) {
+    echo "<table>"."\n";
+	for($i = 0; $i < $height; $i++) {
+        echo "<tr>"."\n";
+		for($j = 0; $j < $width; $j++) {
+		    echo "<td><div id='cell".conv($i, $j, $height). "'>"."\n";
+			echo($maze[$i][$j]);
+            echo "</div></td>"."\n";
+		}
+        echo "</tr>"."\n";
+	}
+    echo "</table>"."\n"."<br>"."<br>";
+}
+
+// function recolor($cell, $maze, $height, $width) {
+//     for($i = 0; $i < $height; $i++) {
+// 		for($j = 0; $j < $width; $j++) {
+// 		    if ($cell[conv($i,$j,$height)]['state'] == SEEN) {
+// 		    ?><script>
+//               document.getElementByID("cell" + <?php echo conv($i,$j,$height); ?>).style.backgroundColor = "red";
+//             </script><?php
+// 		    }
+// 		}
+// 	}
+// }
 
 function conv($x, $y, $height) {
 	return $y * $height + $x;
@@ -62,11 +79,17 @@ function display($cell, $maze, $height, $width) {
 	for($i = 0; $i < $height; $i++) {
         echo "<tr>"."\n";
 		for($j = 0; $j < $width; $j++) {
-            echo "<td>"."\n";
+		    if ($cell[conv($i,$j,$height)]['state'] == SEEN) {
+		        echo "<td><div style='background-color:green;'>"."\n";
+		    } else if ($cell[conv($i,$j,$height)]['state'] == VISITED) {
+		        echo "<td><div style='background-color:red;'>"."\n";
+		    } else {
+		        echo "<td><div style='background-color:white;'>"."\n";
+		    }
 			echo($maze[$i][$j])." [";
 			echo($cell[conv($i, $j, $height)]['from_start'])." ";
 			echo($cell[conv($i, $j, $height)]['to_end'])."] ";
-            echo "</td>"."\n";
+            echo "</div></td>"."\n";
 		}
         echo "</tr>"."\n";
 	}
@@ -81,10 +104,13 @@ function pathfinding($cell, $initial, $height) {
         $current_cell = $cell[$current_cell]["previous"];
         array_push($path, $current_cell);
     }
-    array_flip($path);
+    $c_path = "";
     foreach($path as &$item) {
         echo break_x($item, $height)." ".break_y($item, $height)."<br>";
+        $c_path = $item.".".$c_path;
     }
+    setcookie("path", $c_path, time() + 3600);
+    setcookie("allow", "1", time() + 3600);
 }
 
 function cell_process($cell, $conv_id, $neighbor_x, $neighbor_y, $neighbor_path, $answer_x, $answer_y, $height) {
@@ -106,7 +132,7 @@ $seen_cells = array();
 for($i = 0; $i < $height * $width; $i++) {
 	array_push($cell, array('from_start' => 0, 'to_end' => 0, 'previous' => -1, 'state' => 0));
 }
-
+main_table($maze, $height, $width);
 $cycle = 1;
 while($cycle) {
 	if (($current_x > 0)&&($maze[$current_x - 1][$current_y] != 0)) {
@@ -138,12 +164,12 @@ while($cycle) {
     $cell[conv($current_x,$current_y, $height)]['state'] = VISITED;
 	$current_x = break_x($new_best, $height);
 	$current_y = break_y($new_best, $height);
-	echo($current_x)." ";
-	echo($current_y)."<br>";
-	display($cell, $maze, $height, $width);
+// 	display($cell, $maze, $height, $width);
 	if (($current_x == $answer_x) && ($current_y == $answer_y)) {
 		$cycle = 0;
         pathfinding($cell, $new_best, $height);
+	} else {
+	    $cycle++;
 	}
 }
     

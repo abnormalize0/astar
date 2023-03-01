@@ -1,5 +1,8 @@
 <!doctype html>
 <html lang="ru">
+    <head>
+        <link rel="stylesheet" href="astar.css">
+    </head>
     <body>
         <!--<form id ="inputfile" action="astar.php" method="post" enctype="multipart/form-data">-->
         <!--  Select image to upload:-->
