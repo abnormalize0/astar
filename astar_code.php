@@ -1,17 +1,35 @@
 <?php
+
+if (isset($_COOKIE["file"])) {
+    // print "lang cookie value: " . $_COOKIE["file"];
+    $analyze = $_COOKIE["file"];
+    setcookie("file", "", time() - 3600);
+} else {
+    print "lang cookie doesn't exists";
+    die();
+}
+
+$maze = array();
+$rows = explode("\n", $analyze);
+foreach($rows as &$item) {
+    array_push($maze, explode(" ", $item));
+}
+
 define ("NOT_VISITED", 0);
 define ("SEEN", 1);
 define ("VISITED", 2);
 
-$height = 5;
-$width = 5;
-$maze = [
-    [1,1,1,1,1],
-    [9,1,1,1,1],
-    [9,0,0,0,1],
-    [9,1,1,1,1],
-    [1,1,2,1,1]
-];
+$height = count($maze);
+$width = count($maze[0]);
+
+echo ">".$height."\n>".$width."\n";
+// $maze = [
+//     [1,1,1,1,1],
+//     [9,1,1,1,1],
+//     [9,0,0,0,1],
+//     [9,1,1,1,1],
+//     [1,1,2,1,1]
+// ];
 
 $current_x = 4;
 $current_y = 0;
