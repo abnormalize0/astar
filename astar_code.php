@@ -8,7 +8,7 @@ function initial_table($maze, $height, $width) {
 	for($i = 0; $i < $height; $i++) {
         echo "<tr>"."\n";
 		for($j = 0; $j < $width; $j++) {
-		    echo "<td><div class='action' onclick='setpoint(".$i.", ".$j.")' id='cell".conv($i, $j, $height). "'>"."\n";
+		    echo "<td><div class='action' onclick='setpoint(".$i.", ".$j.", ".conv($i, $j, $height).")' id='cell".conv($i, $j, $height). "'>"."\n";
 			echo($maze[$i][$j]);
             echo "</div></td>"."\n";
 		}
@@ -31,9 +31,9 @@ function path_table($maze, $cell, $initial, $height, $width) {
         echo "<tr>"."\n";
 		for($j = 0; $j < $width; $j++) {
 		    if (array_search(conv($i, $j, $height), $path) != "") {
-		        echo "<td><div class='action' style='background-color: #45A29E;' onclick='setpoint(".$i.", ".$j.")' id='cell".conv($i, $j, $height). "'>"."\n";
+		        echo "<td><div class='action' style='background-color: #45A29E;' onclick='setpoint(".$i.", ".$j.", ".conv($i, $j, $height).")' id='cell".conv($i, $j, $height). "'>"."\n";
 		    } else {
-		        echo "<td><div class='action' onclick='setpoint(".$i.", ".$j.")' id='cell".conv($i, $j, $height). "'>"."\n";
+		        echo "<td><div class='action' onclick='setpoint(".$i.", ".$j.", ".conv($i, $j, $height).")' id='cell".conv($i, $j, $height). "'>"."\n";
 		    }
 			echo($maze[$i][$j]);
             echo "</div></td>"."\n";
@@ -96,9 +96,14 @@ function main() {
             unlink("uploads/".$_COOKIE["file"]);
             $_SESSION['file'] = $analyze;
         }
+		if ($analyze == 0) {
+            return;
+        }
         $rows = explode("\n", $analyze);
         foreach($rows as &$item) {
-            array_push($maze, explode(" ", $item));
+            if (count(explode(" ", $item)) != 1) {
+                array_push($maze, explode(" ", $item));
+            }
         }
         $height = count($maze);
         $width = count($maze[0]);
@@ -137,7 +142,9 @@ function main() {
         }
         $rows = explode("\n", $analyze);
         foreach($rows as &$item) {
-            array_push($maze, explode(" ", $item));
+            if (count(explode(" ", $item)) != 1) {
+                array_push($maze, explode(" ", $item));
+            }
         }
         $height = count($maze);
         $width = count($maze[0]);
@@ -169,20 +176,36 @@ function main() {
     }
     while($cycle) {
     	if (($current_x > 0)&&($maze[$current_x - 1][$current_y] != 0)) {
-    		if ($cell[conv($current_x - 1, $current_y, $height)]['state'] == NOT_VISITED) array_push($seen_cells, conv($current_x - 1, $current_y, $height));
-    		$cell = cell_process($cell, conv($current_x, $current_y, $height), $current_x - 1, $current_y, $maze[$current_x - 1][$current_y], $answer_x, $answer_y, $height);
+    		if ($cell[conv($current_x - 1, $current_y, $height)]['state'] == NOT_VISITED) {
+				array_push($seen_cells, conv($current_x - 1, $current_y, $height));
+			}
+    		$cell = cell_process($cell, conv($current_x, $current_y, $height), 
+								$current_x - 1, $current_y, $maze[$current_x - 1][$current_y], 
+								$answer_x, $answer_y, $height);
     	} 
     	if (($current_x < $height - 1)&&($maze[$current_x + 1][$current_y] != 0)) {
-    		if ($cell[conv($current_x + 1, $current_y, $height)]['state'] == NOT_VISITED) array_push($seen_cells, conv($current_x + 1, $current_y, $height));
-    		$cell = cell_process($cell, conv($current_x, $current_y, $height), $current_x + 1, $current_y, $maze[$current_x + 1][$current_y], $answer_x, $answer_y, $height);
+    		if ($cell[conv($current_x + 1, $current_y, $height)]['state'] == NOT_VISITED) {
+				array_push($seen_cells, conv($current_x + 1, $current_y, $height));
+			}
+    		$cell = cell_process($cell, conv($current_x, $current_y, $height), 
+								$current_x + 1, $current_y, $maze[$current_x + 1][$current_y], 
+								$answer_x, $answer_y, $height);
     	} 
     	if (($current_y > 0)&&($maze[$current_x][$current_y - 1] != 0)) {
-    		if ($cell[conv($current_x, $current_y - 1, $height)]['state'] == NOT_VISITED) array_push($seen_cells, conv($current_x, $current_y - 1, $height));
-    		$cell = cell_process($cell, conv($current_x, $current_y, $height), $current_x, $current_y - 1, $maze[$current_x][$current_y - 1], $answer_x, $answer_y, $height);
+    		if ($cell[conv($current_x, $current_y - 1, $height)]['state'] == NOT_VISITED) {
+				array_push($seen_cells, conv($current_x, $current_y - 1, $height));
+			}
+    		$cell = cell_process($cell, conv($current_x, $current_y, $height), 
+							$current_x, $current_y - 1, $maze[$current_x][$current_y - 1], 
+							$answer_x, $answer_y, $height);
     	} 
     	if (($current_y < $width - 1)&&($maze[$current_x][$current_y + 1] != 0)) {
-    		if ($cell[conv($current_x, $current_y + 1, $height)]['state'] == NOT_VISITED) array_push($seen_cells, conv($current_x, $current_y + 1, $height));
-    		$cell = cell_process($cell, conv($current_x, $current_y, $height), $current_x, $current_y + 1, $maze[$current_x][$current_y + 1], $answer_x, $answer_y, $height);
+    		if ($cell[conv($current_x, $current_y + 1, $height)]['state'] == NOT_VISITED) {
+				array_push($seen_cells, conv($current_x, $current_y + 1, $height));
+			}
+    		$cell = cell_process($cell, conv($current_x, $current_y, $height), 
+							$current_x, $current_y + 1, $maze[$current_x][$current_y + 1], 
+							$answer_x, $answer_y, $height);
     	} 
     	if (count($seen_cells) == 0) {
     	    initial_table($maze, $height, $width);
@@ -193,7 +216,8 @@ function main() {
     	foreach($seen_cells as &$value) {
     		if ($cell[$value]['from_start'] + $cell[$value]['to_end'] < $cell[$new_best]['from_start'] + $cell[$new_best]['to_end']) {
     			$new_best = $value;
-    		} else if (($cell[$value]['from_start'] + $cell[$value]['to_end'] == $cell[$new_best]['from_start'] + $cell[$new_best]['to_end'])&&($cell[$value]['to_end'] < $cell[$new_best]['to_end'])) {
+    		} else if (($cell[$value]['from_start'] + $cell[$value]['to_end'] == $cell[$new_best]['from_start'] + $cell[$new_best]['to_end'])
+						&&($cell[$value]['to_end'] < $cell[$new_best]['to_end'])) {
     			$new_best = $value;
     		}
     	}

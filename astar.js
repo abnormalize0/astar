@@ -29,9 +29,11 @@ for(let i = 0; i <ca.length; i++) {
 }
 return "";
 }
-function setpoint(x,y) {
+function setpoint(x, y, id) {
   let test = getCookie("point1x");
   if (test == "-1") {
+      console.log(id);
+      document.getElementById("cell" + id).style.backgroundColor = "#45A29E";
       createCookie("point1x", x, "1");
       createCookie("point1y", y, "1");
   } else {
