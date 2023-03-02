@@ -1,6 +1,85 @@
+*{
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+body{
+    background-color: #0B0C10;
+    color: white;
+} 
+
 th, td {
-    background-color: white;
-    width:30px;
-    height:30px;
+    background-color: transparent;
+    width:1vw;
+    height:1vw;
+    text-align: center;
+    border-style: solid;
+    border-color: #66FCF1;
+}
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+    color: white;
+    border-style: solid;
+    border-color: #66FCF1;
+}
+
+.action {
+    width:1vw;
+    height:1vw;
+}
+
+.warning {
+    font-size: 2vw;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bolder;
     text-align: center;
 }
+
+.hidden {
+    transform: scale(0);
+}
+
+
+.big{
+    font-size: 4.5vw;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bolder;
+    color: #66FCF1;
+}
+
+.small{
+    font-size: 1.1vw;
+    font-family: 'Roboto', sans-serif;
+    color: white;
+}
+
+.button {
+  position: relative;
+  text-align: center;
+  top:1px;
+  left:43vw;
+  width: 14vw;
+  background-color: transparent;
+  border: 2px solid #66FCF1;
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: white;
+  display: inline-block;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.1vw;
+  font-weight: 600;
+  line-height: 20px;
+  margin: 0;
+  outline: none;
+  padding: 13px 23px;
+}
+
+.button:active {
+  transform: scale(.96);
+}
+
+
+
