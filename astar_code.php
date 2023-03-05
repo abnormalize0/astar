@@ -102,12 +102,12 @@ function display_table($maze, $path = [], $draw_path = false) {
 			else {
 				echo "<td><div class='action' id='cell" . $id_1d . "'";
 			}
-			if ($maze->get_cell_weight($i, $j) != 0) {
+			if ($maze->structure[$i][$j] != 0) {
 			    echo " onclick='setpoint(" . $i . ", " . $j . ", " . $id_1d . ")'>";
 			} else {
 			    echo ">";
 			}
-			echo ($maze->get_cell_weight($i, $j));
+			echo ($maze->structure[$i][$j]);
 			echo "</div></td>" . "\n";
 		}
 		echo "</tr>" . "\n";
@@ -121,17 +121,20 @@ function read_file() {
 	if (isset($_SESSION['file'])) {
 		$analyze = $_SESSION['file'];
 	}
-	else {
+	else if (isset($_COOKIE["file"])) {
 		$myfile = fopen("uploads/" . $_COOKIE["file"], "r");
 		$analyze = fread($myfile, filesize("uploads/" . $_COOKIE["file"]));
 		fclose($myfile);
 		unlink("uploads/" . $_COOKIE["file"]);
 		$_SESSION['file'] = $analyze;
+	} else {
+	    return $maze;
 	}
 	if (!isset($_COOKIE['point1x'])) {
         reset_coordinates();
     }
 	if ($analyze == 0) {
+	    echo("<div class='warning'>Подан неподходящий файл.</div>");
 		return $maze;
 	}
 	$rows = explode("\n", $analyze);
@@ -158,23 +161,19 @@ function astar_process($maze, $cell) {
 		$origin_cell_idx = $maze->convert_coord_to_index($maze->current_x, $maze->current_y);
 		if (($maze->current_x > 0) && ($maze->get_cell_weight($maze->current_x - 1, $maze->current_y) != 0)) {
 			$neighbor_cell_idx = $maze->convert_coord_to_index($maze->current_x - 1, $maze->current_y);
-			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , 
-                            $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
+			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
 		}
 		if (($maze->current_x < $maze->height - 1) && ($maze->get_cell_weight($maze->current_x + 1, $maze->current_y) != 0)) {
 			$neighbor_cell_idx = $maze->convert_coord_to_index($maze->current_x + 1, $maze->current_y);
-			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , 
-                            $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
+			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
 		}
 		if (($maze->current_y > 0) && ($maze->get_cell_weight($maze->current_x, $maze->current_y - 1) != 0)) {
 			$neighbor_cell_idx = $maze->convert_coord_to_index($maze->current_x, $maze->current_y - 1);
-			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , 
-                            $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
+			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
 		}
 		if (($maze->current_y < $maze->width - 1) && ($maze->get_cell_weight($maze->current_x, $maze->current_y + 1) != 0)) {
 			$neighbor_cell_idx = $maze->convert_coord_to_index($maze->current_x, $maze->current_y + 1);
-			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , 
-                            $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
+			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
 		}
 		if (count($seen_cells) == 0) {
 			display_table($maze);
@@ -185,8 +184,7 @@ function astar_process($maze, $cell) {
 			if ($cell[$value]->from_start + $cell[$value]->to_end < $cell[$new_best]->from_start + $cell[$new_best]->to_end) {
 				$new_best = $value;
 			}
-			else if (($cell[$value]->from_start + $cell[$value]->to_end == $cell[$new_best]->from_start + $cell[$new_best]->to_end) 
-                    && ($cell[$value]->to_end > $cell[$new_best]->to_end)) {
+			else if (($cell[$value]->from_start + $cell[$value]->to_end == $cell[$new_best]->from_start + $cell[$new_best]->to_end) && ($cell[$value]->to_end > $cell[$new_best]->to_end)) {
 				$new_best = $value;
 			}
 		}
@@ -211,9 +209,8 @@ function astar_process($maze, $cell) {
 
 function main() {
 	session_start();
-	$maze_structure = read_file();
+	$maze_structure = read_file(); //добавить проверку на пустой массив
 	if (count($maze_structure) == 0) {
-	    echo("<div class='warning'>Подан неподходящий файл.</div>");
 	    return;
 	}
 	$maze = new Maze($maze_structure);
