@@ -36,7 +36,7 @@ function setpoint(x, y, id) {
       document.getElementById("cell" + id).style.backgroundColor = "#45A29E";
       createCookie("point1x", x, "1");
       createCookie("point1y", y, "1");
-  } else {
+  } else if (!((getCookie("point1x") == x) && (getCookie("point1y") == y))) {
       createCookie("point2x", x, "1");
       createCookie("point2y", y, "1");
       location.reload();
