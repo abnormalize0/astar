@@ -102,12 +102,12 @@ function display_table($maze, $path = [], $draw_path = false) {
 			else {
 				echo "<td><div class='action' id='cell" . $id_1d . "'";
 			}
-			if ($maze->structure[$i][$j] != 0) {
+			if ($maze->get_cell_weight($i, $j) != 0) {
 			    echo " onclick='setpoint(" . $i . ", " . $j . ", " . $id_1d . ")'>";
 			} else {
 			    echo ">";
 			}
-			echo ($maze->structure[$i][$j]);
+			echo ($maze->get_cell_weight($i, $j));
 			echo "</div></td>" . "\n";
 		}
 		echo "</tr>" . "\n";
@@ -158,19 +158,23 @@ function astar_process($maze, $cell) {
 		$origin_cell_idx = $maze->convert_coord_to_index($maze->current_x, $maze->current_y);
 		if (($maze->current_x > 0) && ($maze->get_cell_weight($maze->current_x - 1, $maze->current_y) != 0)) {
 			$neighbor_cell_idx = $maze->convert_coord_to_index($maze->current_x - 1, $maze->current_y);
-			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
+			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , 
+                            $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
 		}
 		if (($maze->current_x < $maze->height - 1) && ($maze->get_cell_weight($maze->current_x + 1, $maze->current_y) != 0)) {
 			$neighbor_cell_idx = $maze->convert_coord_to_index($maze->current_x + 1, $maze->current_y);
-			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
+			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , 
+                            $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
 		}
 		if (($maze->current_y > 0) && ($maze->get_cell_weight($maze->current_x, $maze->current_y - 1) != 0)) {
 			$neighbor_cell_idx = $maze->convert_coord_to_index($maze->current_x, $maze->current_y - 1);
-			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
+			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , 
+                            $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
 		}
 		if (($maze->current_y < $maze->width - 1) && ($maze->get_cell_weight($maze->current_x, $maze->current_y + 1) != 0)) {
 			$neighbor_cell_idx = $maze->convert_coord_to_index($maze->current_x, $maze->current_y + 1);
-			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
+			$seen_cells = $cell[$neighbor_cell_idx]->astar_step($cell[$origin_cell_idx]->from_start , 
+                            $seen_cells, $maze->current_x, $maze->current_y, $maze->answer_x, $maze->answer_y);
 		}
 		if (count($seen_cells) == 0) {
 			display_table($maze);
@@ -181,7 +185,8 @@ function astar_process($maze, $cell) {
 			if ($cell[$value]->from_start + $cell[$value]->to_end < $cell[$new_best]->from_start + $cell[$new_best]->to_end) {
 				$new_best = $value;
 			}
-			else if (($cell[$value]->from_start + $cell[$value]->to_end == $cell[$new_best]->from_start + $cell[$new_best]->to_end) && ($cell[$value]->to_end > $cell[$new_best]->to_end)) {
+			else if (($cell[$value]->from_start + $cell[$value]->to_end == $cell[$new_best]->from_start + $cell[$new_best]->to_end) 
+                    && ($cell[$value]->to_end > $cell[$new_best]->to_end)) {
 				$new_best = $value;
 			}
 		}
